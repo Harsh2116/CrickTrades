@@ -588,7 +588,23 @@ app.post('/api/kyc', authenticateToken, upload.single('panCardPhoto'), async (re
 });
 
 // Create HTTP server and initialize WebSocket server
-const server = http.createServer(app);
+const server = http.createServer((req, res) => {
+  if (req.url === '/admin' || req.url === '/admin/') {
+    const filePath = path.join(__dirname, '../admin/index.html');
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(500);
+        res.end('Error loading admin panel');
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(data);
+      }
+    });
+  } else {
+    server.emit('request', req, res);
+  }
+});
+
 initWebSocketServer(server);
 
 // Add upgrade event listener to handle WebSocket upgrade requests
