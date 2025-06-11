@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Reports Dashboard</title>
+    <link rel="stylesheet" href="/admin/styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 1rem;
+        }
+        h1 {
+            color: #004aad;
+            margin-bottom: 1rem;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+        .section {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 74, 173, 0.2);
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #004aad;
+            margin-bottom: 0.5rem;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .card {
+            background: #e6f0ff;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 74, 173, 0.1);
+        }
+        .card h3 {
+            margin: 0.5rem 0;
+            color: #003d99;
+        }
+        .filters {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+        .filters label {
+            font-weight: bold;
+            color: #004aad;
+        }
+        .filters select, .filters input {
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        th {
+            background-color: #004aad;
+            color: white;
+        }
+        .export-buttons {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+        button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #003377;
+        }
+        canvas {
+            max-width: 100%;
+            height: 250px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Admin Reports Dashboard</h1>
+
+    <div class="filters">
+        <label for="dateRange">Date Range:</label>
+        <select id="dateRange">
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="last7days">Last 7 Days</option>
+            <option value="thisMonth">This Month</option>
+            <option value="custom">Custom</option>
+        </select>
+        <input type="date" id="startDate" style="display:none;" />
+        <input type="date" id="endDate" style="display:none;" />
+        <label for="userId">User ID:</label>
+        <input type="text" id="userId" placeholder="User ID" />
+        <label for="contestId">Contest ID:</label>
+        <input type="text" id="contestId" placeholder="Contest ID" />
+        <label for="playerName">Player Name:</label>
+        <input type="text" id="playerName" placeholder="Player Name" />
+        <button id="applyFilters">Apply Filters</button>
+    </div>
+
+    <div class="export-buttons">
+        <button id="exportCSV">Export CSV</button>
+        <button id="exportExcel">Export Excel</button>
+        <button id="exportPDF">Export PDF</button>
+    </div>
+
+    <div class="container">
+
+        <!-- 1. Dashboard Overview -->
+        <section class="section" id="dashboardOverview">
+            <h2>Dashboard Overview</h2>
+            <div class="summary-cards">
+                <div class="card"><div>Total Registered Users</div><h3 id="totalUsers">-</h3></div>
+                <div class="card"><div>Active Users Today / This Week</div><h3 id="activeUsers">-</h3></div>
+                <div class="card"><div>Ongoing Contests Count</div><h3 id="ongoingContests">-</h3></div>
+                <div class="card"><div>Total Contests Conducted</div><h3 id="totalContests">-</h3></div>
+                <div class="card"><div>Total Credits Issued</div><h3 id="totalCreditsIssued">-</h3></div>
+                <div class="card"><div>Total Contest Entry Fees Collected</div><h3 id="totalEntryFees">-</h3></div>
+                <div class="card"><div>Total Prize Payouts Made</div><h3 id="totalPayouts">-</h3></div>
+                <div class="card"><div>Platform Profit (Entries - Payouts)</div><h3 id="platformProfit">-</h3></div>
+                <div class="card"><div>Last 24h Trades Count</div><h3 id="last24hTrades">-</h3></div>
+                <div class="card"><div>Most Traded Player Today</div><h3 id="mostTradedPlayer">-</h3></div>
+            </div>
+        </section>
+
+        <!-- 2. User Analytics -->
+        <section class="section" id="userAnalytics">
+            <h2>User Analytics</h2>
+            <canvas id="totalUsersChart"></canvas>
+            <canvas id="dailyRegistrationsChart"></canvas>
+            <div>
+                <h3>Users Joined Contests Today/This Week</h3>
+                <table id="usersJoinedContestsTable">
+                    <thead>
+                        <tr><th>User ID</th><th>Contests Joined</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div>
+                <h3>Top 10 Users with Most Profit</h3>
+                <table id="topProfitUsersTable">
+                    <thead>
+                        <tr><th>User ID</th><th>Profit</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div>
+                <h3>Top 10 Users with Highest Loss</h3>
+                <table id="topLossUsersTable">
+                    <thead>
+                        <tr><th>User ID</th><th>Loss</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div>
+                <h3>Suspicious Users</h3>
+                <table id="suspiciousUsersTable">
+                    <thead>
+                        <tr><th>User ID</th><th>Reason</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 3. Contest Reports -->
+        <section class="section" id="contestReports">
+            <h2>Contest Reports</h2>
+            <table id="contestStatsTable">
+                <thead>
+                    <tr>
+                        <th>Contest Name</th>
+                        <th>Entry Fee</th>
+                        <th>Total Participants</th>
+                        <th>Total Entry Credits</th>
+                        <th>Total Payouts</th>
+                        <th>Profit/Loss</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <canvas id="mostJoinedContestsChart"></canvas>
+            <canvas id="contestTrendsChart"></canvas>
+            <div>
+                <h3>Completed Contests</h3>
+                <table id="completedContestsTable">
+                    <thead>
+                        <tr><th>Contest Name</th><th>Date</th><th>Participants</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 4. Player Stock Report -->
+        <section class="section" id="playerStockReport">
+            <h2>Player Stock Report</h2>
+            <table id="topTradedPlayersTable">
+                <thead>
+                    <tr><th>Player Name</th><th>Volume</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <table id="priceGainLossTable">
+                <thead>
+                    <tr><th>Player Name</th><th>Price Change</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <table id="currentPlayerPricesTable">
+                <thead>
+                    <tr><th>Player Name</th><th>Current Price</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <canvas id="volumeChangesChart"></canvas>
+            <div>
+                <h3>Abnormal Stock Activity</h3>
+                <table id="abnormalStockActivityTable">
+                    <thead>
+                        <tr><th>Player Name</th><th>Volume Change</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 5. Financial Report -->
+        <section class="section" id="financialReport">
+            <h2>Financial Report</h2>
+            <div class="summary-cards">
+                <div class="card"><div>Total Credits in System</div><h3 id="totalCreditsSystem">-</h3></div>
+                <div class="card"><div>Total Credits Issued</div><h3 id="totalCreditsIssuedFin">-</h3></div>
+                <div class="card"><div>Total Credits Used for Entries</div><h3 id="totalCreditsUsed">-</h3></div>
+                <div class="card"><div>Total Credits Refunded</div><h3 id="totalCreditsRefunded">-</h3></div>
+                <div class="card"><div>Total Prize Credits Distributed</div><h3 id="totalPrizeCredits">-</h3></div>
+                <div class="card"><div>Platform’s Net Balance</div><h3 id="platformNetBalance">-</h3></div>
+            </div>
+            <canvas id="revenueTrendChart"></canvas>
+        </section>
+
+        <!-- 6. Alerts & Flags -->
+        <section class="section" id="alertsFlags">
+            <h2>Alerts & Flags</h2>
+            <table id="alertsTable">
+                <thead>
+                    <tr><th>User/Player</th><th>Issue</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- 7. System Logs -->
+        <section class="section" id="systemLogs">
+            <h2>System Logs</h2>
+            <table id="systemLogsTable">
+                <thead>
+                    <tr><th>Date</th><th>Event</th><th>Status</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- 8. Export & Download -->
+        <section class="section" id="exportDownload">
+            <h2>Export & Download</h2>
+            <p>Use the buttons above to export reports in CSV, Excel, or PDF formats. Automated daily and weekly reports will be available here.</p>
+        </section>
+
+    </div>
+
+    <script>
+        // Show/hide custom date inputs based on date range selection
+        const dateRangeSelect = document.getElementById('dateRange');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        dateRangeSelect.addEventListener('change', () => {
+            if (dateRangeSelect.value === 'custom') {
+                startDateInput.style.display = 'inline-block';
+                endDateInput.style.display = 'inline-block';
+            } else {
+                startDateInput.style.display = 'none';
+                endDateInput.style.display = 'none';
+            }
+        });
+
+        // Placeholder functions for fetching and displaying data
+        async function fetchData() {
+            // TODO: Implement API calls to fetch data for each section
+            // For now, populate placeholders with dummy data
+
+            // Dashboard Overview
+            document.getElementById('totalUsers').textContent = '12345';
+            document.getElementById('activeUsers').textContent = '234 / 567';
+            document.getElementById('ongoingContests').textContent = '12';
+            document.getElementById('totalContests').textContent = '345';
+            document.getElementById('totalCreditsIssued').textContent = '98765';
+            document.getElementById('totalEntryFees').textContent = '$123456';
+            document.getElementById('totalPayouts').textContent = '$98765';
+            document.getElementById('platformProfit').textContent = '$24691';
+            document.getElementById('last24hTrades').textContent = '7890';
+            document.getElementById('mostTradedPlayer').textContent = 'Player X';
+
+            // Charts initialization with dummy data
+            const totalUsersChart = new Chart(document.getElementById('totalUsersChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Total Users',
+                        data: [1000, 1500, 2000, 2500, 3000, 3500],
+                        backgroundColor: '#004aad'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const dailyRegistrationsChart = new Chart(document.getElementById('dailyRegistrationsChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Daily New Registrations',
+                        data: [50, 75, 60, 80, 90, 100, 120],
+                        borderColor: '#004aad',
+                        fill: false
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Other tables and charts can be populated similarly with real data from APIs
+        }
+
+        // Event listeners for export buttons (placeholders)
+        document.getElementById('exportCSV').addEventListener('click', () => {
+            alert('Export CSV functionality to be implemented.');
+        });
+        document.getElementById('exportExcel').addEventListener('click', () => {
+            alert('Export Excel functionality to be implemented.');
+        });
+        document.getElementById('exportPDF').addEventListener('click', () => {
+            alert('Export PDF functionality to be implemented.');
+        });
+
+        // Apply filters button placeholder
+        document.getElementById('applyFilters').addEventListener('click', () => {
+            alert('Filter functionality to be implemented.');
+        });
+
+        // Initial data fetch
+        fetchData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Contest Winners</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 1rem;
+        }
+        h1 {
+            color: #004aad;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: #004aad;
+            color: white;
+        }
+        input[type="number"] {
+            width: 100px;
+            padding: 0.5rem;
+            margin-right: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #002f6c;
+        }
+        .message {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Contest Winners</h1>
+    <table id="winnersTable">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Contest ID</th>
+                <th>Winning Amount</th>
+                <th>Paid to User</th>
+                <th>Add Money</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="7">Loading winners...</td></tr>
+        </tbody>
+    </table>
+    <div class="message" id="message"></div>
+
+    <script>
+        const token = localStorage.getItem('admin_token');
+        const winnersTableBody = document.querySelector('#winnersTable tbody');
+        const messageDiv = document.getElementById('message');
+
+        async function fetchWinners() {
+            try {
+                const res = await fetch('http://localhost:3001/api/prizeDistribution/admin/contest-winners', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Failed to fetch contest winners');
+                const data = await res.json();
+                populateWinnersTable(data.winners);
+            } catch (err) {
+                winnersTableBody.innerHTML = '<tr><td colspan="7">Error loading winners</td></tr>';
+                console.error(err);
+            }
+        }
+
+        function populateWinnersTable(winners) {
+            if (winners.length === 0) {
+                winnersTableBody.innerHTML = '<tr><td colspan="7">No winners found</td></tr>';
+                return;
+            }
+            winnersTableBody.innerHTML = '';
+            winners.forEach(winner => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${winner.user_id}</td>
+                    <td>${winner.full_name}</td>
+                    <td>${winner.username}</td>
+                    <td>${winner.contest_id}</td>
+                    <td>${winner.winning_amount}</td>
+                    <td>${winner.paid ? 'Yes' : 'No'}</td>
+                    <td>
+                        <input type="number" min="1" placeholder="Amount" id="amount-${winner.user_id}" />
+                        <button onclick="addMoney(${winner.user_id}, ${winner.contest_id})" ${winner.paid ? 'disabled' : ''}>Add</button>
+                    </td>
+                `;
+                winnersTableBody.appendChild(tr);
+            });
+        }
+
+        async function addMoney(userId, contestId) {
+            const input = document.getElementById(`amount-${userId}`);
+            if (!input) {
+                alert('Amount input not found');
+                return;
+            }
+            const rawValue = input.value.trim();
+            console.log(`Raw input value for user ${userId}:`, rawValue);
+            // Remove commas and other non-numeric characters except dot
+            const cleanedValue = rawValue.replace(/[^0-9.]/g, '');
+            console.log(`Cleaned input value for user ${userId}:`, cleanedValue);
+            const amount = parseFloat(cleanedValue);
+            console.log(`Parsed amount for user ${userId}:`, amount);
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            try {
+                const res = await fetch(`http://localhost:3001/api/prizeDistribution/admin/users/${userId}/add-money`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ amount, contestId })
+                });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || 'Failed to add money');
+                }
+                const data = await res.json();
+                messageDiv.textContent = data.message;
+                input.value = '';
+                // Refresh winners list to update paid status
+                fetchWinners();
+            } catch (err) {
+                messageDiv.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        fetchWinners();
+    </script>
+</body>
+</html>

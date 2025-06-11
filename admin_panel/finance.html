@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Finance Overview</title>
+    <link rel="stylesheet" href="/admin/styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 1rem;
+        }
+        h1, h2 {
+            color: #004aad;
+        }
+        section {
+            margin-bottom: 2rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        th {
+            background-color: #004aad;
+            color: white;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .summary-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .loading {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Finance Overview</h1>
+
+    <section id="totalsSection">
+        <h2>Total Collections & Transactions</h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>Today</h3>
+                <p>GST: <span id="dayGst">Loading...</span></p>
+                <p>TDS: <span id="dayTds">Loading...</span></p>
+                <p>Deposits: <span id="dayDeposits">Loading...</span></p>
+                <p>Withdrawals: <span id="dayWithdrawals">Loading...</span></p>
+            </div>
+            <div class="summary-card">
+                <h3>This Week</h3>
+                <p>GST: <span id="weekGst">Loading...</span></p>
+                <p>TDS: <span id="weekTds">Loading...</span></p>
+                <p>Deposits: <span id="weekDeposits">Loading...</span></p>
+                <p>Withdrawals: <span id="weekWithdrawals">Loading...</span></p>
+            </div>
+            <div class="summary-card">
+                <h3>This Month</h3>
+                <p>GST: <span id="monthGst">Loading...</span></p>
+                <p>TDS: <span id="monthTds">Loading...</span></p>
+                <p>Deposits: <span id="monthDeposits">Loading...</span></p>
+                <p>Withdrawals: <span id="monthWithdrawals">Loading...</span></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="userCollectionsSection">
+        <h2>User-wise GST & TDS Collection</h2>
+        <table id="userCollectionsTable">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Total GST</th>
+                    <th>Total TDS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="5" class="loading">Loading user collections...</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="withdrawalRequestsSection">
+        <h2>Pending Withdrawal Requests</h2>
+        <table id="withdrawalRequestsTable">
+            <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>User ID</th>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Details</th>
+                    <th>Request Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="8" class="loading">Loading withdrawal requests...</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <script>
+        const token = localStorage.getItem('admin_token');
+
+        async function fetchFinanceSummary() {
+            try {
+                const res = await fetch('http://localhost:3001/api/admin/finance/summary', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Failed to fetch finance summary');
+                const data = await res.json();
+                updateFinanceSummary(data);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function updateFinanceSummary(data) {
+            const { dayTotals, weekTotals, monthTotals } = data;
+            document.getElementById('dayGst').textContent = dayTotals.gst_total || '0';
+            document.getElementById('dayTds').textContent = dayTotals.tds_total || '0';
+            document.getElementById('dayDeposits').textContent = dayTotals.deposit_total || '0';
+            document.getElementById('dayWithdrawals').textContent = dayTotals.withdrawal_total || '0';
+
+            document.getElementById('weekGst').textContent = weekTotals.gst_total || '0';
+            document.getElementById('weekTds').textContent = weekTotals.tds_total || '0';
+            document.getElementById('weekDeposits').textContent = weekTotals.deposit_total || '0';
+            document.getElementById('weekWithdrawals').textContent = weekTotals.withdrawal_total || '0';
+
+            document.getElementById('monthGst').textContent = monthTotals.gst_total || '0';
+            document.getElementById('monthTds').textContent = monthTotals.tds_total || '0';
+            document.getElementById('monthDeposits').textContent = monthTotals.deposit_total || '0';
+            document.getElementById('monthWithdrawals').textContent = monthTotals.withdrawal_total || '0';
+        }
+
+        async function fetchUserCollections() {
+            try {
+                const res = await fetch('http://localhost:3001/api/admin/finance/user-collections', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Failed to fetch user collections');
+                const data = await res.json();
+                populateUserCollectionsTable(data.userCollections);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function populateUserCollectionsTable(users) {
+            const tbody = document.querySelector('#userCollectionsTable tbody');
+            tbody.innerHTML = '';
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No data available</td></tr>';
+                return;
+            }
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.user_id}</td>
+                    <td>${user.full_name}</td>
+                    <td>${user.username}</td>
+                    <td>${user.total_gst || 0}</td>
+                    <td>${user.total_tds || 0}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function fetchWithdrawalRequests() {
+            try {
+                const res = await fetch('http://localhost:3001/api/admin/finance/withdrawal-requests', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Failed to fetch withdrawal requests');
+                const data = await res.json();
+                populateWithdrawalRequestsTable(data.withdrawalRequests);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function populateWithdrawalRequestsTable(requests) {
+            const tbody = document.querySelector('#withdrawalRequestsTable tbody');
+            tbody.innerHTML = '';
+            if (requests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8">No pending withdrawal requests</td></tr>';
+                return;
+            }
+            requests.forEach(req => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${req.id}</td>
+                    <td>${req.user_id}</td>
+                    <td>${req.full_name}</td>
+                    <td>${req.username}</td>
+                    <td>${req.amount}</td>
+                    <td>${req.method}</td>
+                    <td>${req.details}</td>
+                    <td>${new Date(req.request_date).toLocaleString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Initial fetches
+        fetchFinanceSummary();
+        fetchUserCollections();
+        fetchWithdrawalRequests();
+    </script>
+</body>
+</html>

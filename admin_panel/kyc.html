@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Panel - User KYC Details</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        img.pan-photo {
+            max-width: 100px;
+            max-height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h2>User KYC Details</h2>
+        <table id="kyc-table">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>PAN Card Number</th>
+                    <th>Date of Birth</th>
+                    <th>Phone Number</th>
+                    <th>PAN Card Photo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- KYC data rows will be inserted here -->
+            </tbody>
+        </table>
+    </main>
+    <script>
+        async function fetchKycDetails() {
+            try {
+                const token = localStorage.getItem('admin_token');
+                if (!token) {
+                    alert('Admin not authenticated. Please login.');
+                    return;
+                }
+                const response = await fetch('http://localhost:3001/api/admin/kyc-details', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                if (!response.ok) {
+                    alert('Failed to fetch KYC details.');
+                    return;
+                }
+                const data = await response.json();
+                const tbody = document.querySelector('#kyc-table tbody');
+                tbody.innerHTML = '';
+                data.kycDetails.forEach(user => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${user.user_id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.full_name}</td>
+                        <td>${user.pancard_number}</td>
+                        <td>${user.dob ? new Date(user.dob).toLocaleDateString() : ''}</td>
+                        <td>${user.phone}</td>
+                        <td>${user.pan_card_photo ? `<img src="/${user.pan_card_photo}" alt="PAN Card Photo" class="pan-photo" />` : 'No Photo'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error fetching KYC details:', error);
+                alert('Error fetching KYC details.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchKycDetails);
+    </script>
+</body>
+</html>

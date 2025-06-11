@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CrickTrades - Referral</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .referral-container {
+            max-width: 600px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 74, 173, 0.2);
+            text-align: center;
+        }
+        .referral-code {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #004aad;
+            margin: 1rem 0;
+            user-select: all;
+        }
+        .instructions {
+            font-size: 1.1rem;
+            color: #333;
+        }
+        button.copy-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #004aad;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button.copy-btn:hover {
+            background-color: #003080;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CrickTrades</h1>
+        <nav>
+            <a href="market.html">Market</a>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="wallet.html">Wallet</a>
+            <a href="kyc.html">KYC</a>
+            <a href="contest.html">Contest</a>
+            <a href="my_contest.html">My Contests</a>
+            <a href="referral.html" class="active">Referral</a>
+        </nav>
+    </header>
+    <main>
+        <div class="referral-container">
+            <h2>Your Unique Referral Code</h2>
+            <div id="referral-code" class="referral-code"></div>
+            <button class="copy-btn" id="copy-btn">Copy Code</button>
+            <p class="instructions">
+                Share this code with your friends. When they sign up using your code, you both earn rewards!
+            </p>
+            <p class="instructions">
+                If any new user uses your referral code and adds ₹50 to their main balance in wallet, then you will get ₹10 as referral bonus.
+            </p>
+        </div>
+    </main>
+    <script>
+        function generateReferralCode() {
+            // Generate a random 8-character alphanumeric code
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let referralCode = localStorage.getItem("cricktrades_referral_code");
+            if (!referralCode) {
+                referralCode = generateReferralCode();
+                localStorage.setItem("cricktrades_referral_code", referralCode);
+            }
+            const codeEl = document.getElementById("referral-code");
+            codeEl.textContent = referralCode;
+
+            const copyBtn = document.getElementById("copy-btn");
+            copyBtn.addEventListener("click", () => {
+                navigator.clipboard.writeText(referralCode).then(() => {
+                    alert("Referral code copied to clipboard!");
+                }).catch(() => {
+                    alert("Failed to copy referral code. Please copy manually.");
+                });
+            });
+        });
+    </script>
+</body>
+</html>

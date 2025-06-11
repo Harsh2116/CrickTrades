@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CrickTrades - Home</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #004aad;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        main {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+        .intro-box {
+            background: #004aad;
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 74, 173, 0.3);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .intro-box h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+        }
+        .intro-box p {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 74, 173, 0.15);
+            padding: 1.5rem;
+            flex: 1 1 280px;
+            max-width: 300px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0, 74, 173, 0.3);
+        }
+        .feature-card h3 {
+            color: #004aad;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        .feature-card p {
+            color: #555;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            color: #777;
+            font-size: 0.9rem;
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CrickTrades</h1>
+        <nav>
+            <a href="login.html">Login</a>
+            <a href="signup.html">Sign up</a>
+            <a href="how_it_works.html">How It Works</a>
+        </nav>
+    </header>
+    <main>
+        <section class="intro-box">
+            <h2>Why CrickTrades is the Ultimate Fantasy Cricket Platform for Indian Youth</h2>
+            <p>
+                CrickTrades is not just another fantasy cricket website; it’s a revolution for cricket lovers across India. We combine cutting-edge technology with a passion for cricket to deliver an unmatched experience. Our platform offers real-time market data, exciting contests with high winning chances, and a secure wallet system, all wrapped in a sleek, user-friendly interface. Join thousands of young enthusiasts who trust CrickTrades to turn their cricket knowledge into real rewards and unforgettable moments!
+            </p>
+        </section>
+        <section class="features">
+            <div class="feature-card">
+                <h3>Real-Time Market Data</h3>
+                <p>Stay ahead with live updates and dynamic player stats that help you make informed decisions and build winning teams.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Exciting Contests</h3>
+                <p>Participate in daily and weekly contests with attractive prizes and a high winning percentage to keep the excitement alive.</p>
+            </div>
+            <div class="feature-card">
+                <h3>User-Friendly Interface</h3>
+                <p>Enjoy a seamless and intuitive platform designed for cricket fans of all levels, making fantasy cricket fun and accessible.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Secure Wallet & Transactions</h3>
+                <p>Manage your funds effortlessly with our secure wallet system, ensuring safe deposits, withdrawals, and contest entries.</p>
+            </div>
+        </section>
+    </main>
+    <script src="script_additions.js"></script>
+</body>
+</html>

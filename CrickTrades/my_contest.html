@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CrickTrades - My Contests</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <header>
+        <h1>CrickTrades</h1>
+        <nav>
+            <a href="market.html">Market</a>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="wallet.html">Wallet</a>
+            <a href="kyc.html">KYC</a>
+            <a href="contest.html">Contest</a>
+            <a href="my_contest.html" class="active">My Contests</a>
+            <a href="referral.html">Referral</a>
+        </nav>
+    </header>
+    <main class="my-contest-container">
+        <h2>Active Contests</h2>
+        <div id="active-contest-list" class="contest-list">
+            <!-- Active contests will be dynamically loaded here -->
+        </div>
+        <h2>Completed Contests</h2>
+        <div id="completed-contest-list" class="contest-list">
+            <!-- Completed contests will be dynamically loaded here -->
+        </div>
+    </main>
+    <section id="leaderboard-container" class="leaderboard-container hidden">
+        <h2>Leaderboard</h2>
+        <table id="leaderboard-table" class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Username</th>
+                    <th>Profit</th>
+                    <th>Prize</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button id="close-leaderboard" class="btn close-leaderboard-btn">Close Leaderboard</button>
+    </section>
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const joinedContestsContainer = document.getElementById("joined-contest-list");
+            const leaderboardContainer = document.getElementById("leaderboard-container");
+            const leaderboardTableBody = document.querySelector("#leaderboard-table tbody");
+            const closeLeaderboardBtn = document.getElementById("close-leaderboard");
+
+            async function fetchLeaderboard(contestId) {
+                try {
+                    const response = await fetch(`http://localhost:3001/api/leaderboard/${contestId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('cricktrades_token')}`
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch leaderboard');
+                    }
+                    const data = await response.json();
+                    return data.leaderboard || [];
+                } catch (error) {
+                    console.error('Error fetching leaderboard:', error);
+                    return [];
+                }
+            }
+
+            function renderLeaderboard(contestId) {
+                leaderboardTableBody.innerHTML = "";
+                fetchLeaderboard(contestId).then(data => {
+                    const totalUsers = data.length;
+                    const top50Count = Math.ceil(totalUsers * 0.5);
+
+                    // Simulate current logged-in user for demonstration
+                    const currentUser = "user3";
+
+                    data.forEach(entry => {
+                        const row = document.createElement("tr");
+                        const isWinner = entry.rank <= top50Count;
+                        row.style.backgroundColor = isWinner ? "#d4edda" : "transparent"; // Highlight winners
+                        row.innerHTML = `
+                            <td>${entry.rank}</td>
+                            <td>${entry.username}</td>
+                            <td>${entry.profit}</td>
+                            <td>${entry.prize}</td>
+                            <td>${isWinner ? "Winner" : ""}</td>
+                        `;
+                        leaderboardTableBody.appendChild(row);
+
+                        // If current user is a winner, add prize to withdraw balance
+                        if (entry.username === currentUser && isWinner) {
+                            addPrizeToWallet(entry.profit);
+                        }
+                    });
+                    leaderboardContainer.style.display = "block";
+
+                    // Show prize distribution message
+                        const prizeMessage = document.getElementById("prize-message");
+                        if (!prizeMessage) {
+                            const msg = document.createElement("p");
+                            msg.id = "prize-message";
+                            msg.style.color = "#155724";
+                            msg.style.fontWeight = "bold";
+                            msg.style.marginTop = "1rem";
+                            const top50Count = Math.ceil(totalUsers * 0.5);
+                            msg.textContent = `Prize distributed to top 50% users (${top50Count} out of ${totalUsers}).`;
+                            leaderboardContainer.appendChild(msg);
+                        }
+                });
+            }
+
+            function addPrizeToWallet(prizeAmountStr) {
+                const prizeAmount = parseInt(prizeAmountStr.replace(/[^\d]/g, '')) || 0;
+                let wallet = JSON.parse(localStorage.getItem("cricktrades_wallet")) || { withdrawBalance: 0 };
+                wallet.withdrawBalance = (wallet.withdrawBalance || 0) + prizeAmount;
+                localStorage.setItem("cricktrades_wallet", JSON.stringify(wallet));
+            }
+
+            closeLeaderboardBtn.addEventListener("click", () => {
+                leaderboardContainer.style.display = "none";
+            });
+
+            // Render joined contests
+            async function renderJoinedContests() {
+                try {
+                    const { activeContests, completedContests } = await fetchJoinedContests();
+                    const activeContestsContainer = document.getElementById("active-contest-list");
+                    const completedContestsContainer = document.getElementById("completed-contest-list");
+
+                    if (activeContests.length === 0) {
+                        activeContestsContainer.innerHTML = '<p class="no-contests">You have no active contests.</p>';
+                    } else {
+                        activeContestsContainer.innerHTML = '';
+                        activeContests.forEach(contest => {
+                            const contestCard = document.createElement("div");
+                            contestCard.className = "contest-card";
+                            contestCard.textContent = `${contest.name} - Entry Fee: ₹${contest.entry_fee.toLocaleString('en-IN')}`;
+                            contestCard.addEventListener("click", () => {
+                                renderLeaderboard(contest.contestId);
+                            });
+                            activeContestsContainer.appendChild(contestCard);
+                        });
+                    }
+
+                    if (completedContests.length === 0) {
+                        completedContestsContainer.innerHTML = '<p class="no-contests">You have no completed contests.</p>';
+                    } else {
+                        completedContestsContainer.innerHTML = '';
+                        completedContests.forEach(contest => {
+                            const contestCard = document.createElement("div");
+                            contestCard.className = "contest-card";
+                            contestCard.textContent = `${contest.name} - Entry Fee: ₹${contest.entry_fee.toLocaleString('en-IN')}`;
+                            contestCard.addEventListener("click", () => {
+                                renderLeaderboard(contest.contestId);
+                            });
+                            completedContestsContainer.appendChild(contestCard);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error rendering joined contests:', error);
+                    const activeContestsContainer = document.getElementById("active-contest-list");
+                    const completedContestsContainer = document.getElementById("completed-contest-list");
+                    activeContestsContainer.innerHTML = '<p class="no-contests">Failed to load active contests.</p>';
+                    completedContestsContainer.innerHTML = '<p class="no-contests">Failed to load completed contests.</p>';
+                }
+            }
+
+            renderJoinedContests();
+        });
+    </script>
+</body>
+</html>

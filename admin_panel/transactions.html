@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Transactions Overview</title>
+    <link rel="stylesheet" href="/admin/styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 1rem;
+        }
+        h1 {
+            color: #004aad;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: #004aad;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Transactions Overview</h1>
+    <table id="transactionsTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User ID</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Transactions will be populated here -->
+        </tbody>
+    </table>
+
+    <script>
+        const transactionsTableBody = document.querySelector('#transactionsTable tbody');
+
+        async function fetchTransactions() {
+            try {
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('http://localhost:3001/api/admin/transactions', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    alert('Failed to fetch transactions');
+                    return;
+                }
+                const data = await response.json();
+                populateTransactionsTable(data.transactions);
+            } catch (err) {
+                console.error('Error fetching transactions:', err);
+            }
+        }
+
+        function populateTransactionsTable(transactions) {
+            transactionsTableBody.innerHTML = '';
+            transactions.forEach(tx => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${tx.id}</td>
+                    <td>${tx.user_id}</td>
+                    <td>${tx.type}</td>
+                    <td>${tx.amount}</td>
+                    <td>${new Date(tx.transaction_date).toLocaleString()}</td>
+                `;
+                transactionsTableBody.appendChild(tr);
+            });
+        }
+
+        // Initial fetch
+        fetchTransactions();
+    </script>
+</body>
+</html>

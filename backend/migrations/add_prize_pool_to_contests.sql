@@ -1,0 +1,2 @@
+ALTER TABLE contests
+ADD COLUMN prize_pool DECIMAL(15,2) DEFAULT 0;

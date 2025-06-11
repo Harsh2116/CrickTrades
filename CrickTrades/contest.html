@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CrickTrades - Contest</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .contest-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        .contest-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 74, 173, 0.2);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .contest-section h3 {
+            margin-top: 0;
+            color: #004aad;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        .contest-section p {
+            font-size: 1.1rem;
+            margin: 0.5rem 0 1rem 0;
+            color: #333;
+        }
+        .contest-section .win-chance {
+            background-color: #004aad;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 74, 173, 0.4);
+        }
+        .contest-section button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .contest-section button:hover {
+            background-color: #002f6c;
+        }
+        .contest-message {
+            max-width: 900px;
+            margin: 1rem auto;
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-align: center;
+            color: #004aad;
+            min-height: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CrickTrades</h1>
+        <nav>
+            <a href="market.html">Market</a>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="wallet.html">Wallet</a>
+            <a href="kyc.html">KYC</a>
+            <a href="contest.html" class="active">Contest</a>
+            <a href="my_contest.html">My Contest</a>
+            <a href="referral.html">Referral</a>
+        </nav>
+    </header>
+    <main>
+        <div class="contest-container" id="contest-list">
+            <!-- Contests will be dynamically loaded here -->
+        </div>
+        <div id="contest-message" class="contest-message"></div>
+    </main>
+    <script src="script.js"></script>
+    <script src="script_additions.js"></script>
+</body>
+</html>

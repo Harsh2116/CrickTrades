@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Prizes Management</title>
+    <link rel="stylesheet" href="/admin/styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 1rem;
+        }
+        h1 {
+            color: #004aad;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: #004aad;
+            color: white;
+        }
+        button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #002f6c;
+        }
+        .form-container {
+            margin-top: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 74, 173, 0.2);
+            max-width: 600px;
+        }
+        label {
+            display: block;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.25rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Prizes Management</h1>
+    <table id="prizesTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User ID</th>
+                <th>Contest ID</th>
+                <th>Prize Amount</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Prizes will be populated here -->
+        </tbody>
+    </table>
+
+    <div class="form-container">
+        <h2 id="formTitle">Add New Prize</h2>
+        <form id="prizeForm">
+            <input type="hidden" id="prizeId" />
+            <label for="userId">User</label>
+            <select id="userId">
+                <option value="">All Users</option>
+            </select>
+            <label for="contestId">Contest ID</label>
+            <input type="number" id="contestId" required />
+            <label for="prizeAmount">Prize Amount</label>
+            <input type="number" id="prizeAmount" required step="0.01" />
+            <button type="submit">Save Prize</button>
+            <button type="button" id="cancelEdit" style="margin-left: 1rem;">Cancel</button>
+        </form>
+    </div>
+
+    <script>
+        const prizesTableBody = document.querySelector('#prizesTable tbody');
+        const prizeForm = document.getElementById('prizeForm');
+        const prizeIdInput = document.getElementById('prizeId');
+        const userIdSelect = document.getElementById('userId');
+        const contestIdInput = document.getElementById('contestId');
+        const prizeAmountInput = document.getElementById('prizeAmount');
+        const formTitle = document.getElementById('formTitle');
+        const cancelEditBtn = document.getElementById('cancelEdit');
+
+        async function fetchUsers() {
+            try {
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('http://localhost:3001/api/admin/users', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    alert('Failed to fetch users');
+                    return;
+                }
+                const data = await response.json();
+                populateUserOptions(data.users);
+            } catch (err) {
+                console.error('Error fetching users:', err);
+            }
+        }
+
+        function populateUserOptions(users) {
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.username + ' (' + user.full_name + ')';
+                userIdSelect.appendChild(option);
+            });
+        }
+
+        async function fetchPrizes() {
+            try {
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('http://localhost:3001/api/admin/prizes', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    alert('Failed to fetch prizes');
+                    return;
+                }
+                const data = await response.json();
+                populatePrizesTable(data.prizes);
+            } catch (err) {
+                console.error('Error fetching prizes:', err);
+            }
+        }
+
+        function populatePrizesTable(prizes) {
+            prizesTableBody.innerHTML = '';
+            prizes.forEach(prize => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${prize.id}</td>
+                    <td>${prize.user_id === null ? 'All Users' : prize.user_id}</td>
+                    <td>${prize.contest_id}</td>
+                    <td>${prize.prize_amount}</td>
+                    <td>
+                        <button onclick="editPrize(${prize.id}, ${prize.user_id === null ? "null" : prize.user_id}, ${prize.contest_id}, ${prize.prize_amount})">Edit</button>
+                        <button onclick="deletePrize(${prize.id})">Delete</button>
+                    </td>
+                `;
+                prizesTableBody.appendChild(tr);
+            });
+        }
+
+        function editPrize(id, userId, contestId, prizeAmount) {
+            prizeIdInput.value = id;
+            userIdSelect.value = userId === null ? '' : userId;
+            contestIdInput.value = contestId;
+            prizeAmountInput.value = prizeAmount;
+            formTitle.textContent = 'Edit Prize';
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        cancelEditBtn.addEventListener('click', () => {
+            prizeForm.reset();
+            prizeIdInput.value = '';
+            formTitle.textContent = 'Add New Prize';
+        });
+
+        prizeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = prizeIdInput.value;
+            const user_id = userIdSelect.value === '' ? null : parseInt(userIdSelect.value);
+            const contest_id = parseInt(contestIdInput.value);
+            const prize_amount = parseFloat(prizeAmountInput.value);
+
+            const token = localStorage.getItem('admin_token');
+            try {
+                let response;
+                if (id) {
+                    response = await fetch('http://localhost:3001/api/admin/prizes/' + id, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({ user_id, contest_id, prize_amount })
+                    });
+                } else {
+                    response = await fetch('http://localhost:3001/api/admin/prizes', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({ user_id, contest_id, prize_amount })
+                    });
+                }
+                if (!response.ok) {
+                    alert('Failed to save prize');
+                    return;
+                }
+                alert('Prize saved successfully');
+                prizeForm.reset();
+                prizeIdInput.value = '';
+                formTitle.textContent = 'Add New Prize';
+                fetchPrizes();
+            } catch (err) {
+                console.error('Error saving prize:', err);
+            }
+        });
+
+        async function deletePrize(id) {
+            if (!confirm('Are you sure you want to delete this prize?')) return;
+            try {
+                const token = localStorage.getItem('admin_token');
+                const response = await fetch('http://localhost:3001/api/admin/prizes/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!response.ok) {
+                    alert('Failed to delete prize');
+                    return;
+                }
+                alert('Prize deleted successfully');
+                fetchPrizes();
+            } catch (err) {
+                console.error('Error deleting prize:', err);
+            }
+        }
+
+        // Initial fetch
+        fetchUsers();
+        fetchPrizes();
+    </script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CrickTrades - Login</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 74, 173, 0.2);
+        }
+        h2 {
+            text-align: center;
+            color: #004aad;
+            margin-bottom: 1.5rem;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #004aad;
+        }
+        input[type="text"], input[type="password"] {
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #002f6c;
+        }
+        .message {
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: 700;
+        }
+        .signup-link {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .signup-link a {
+            color: #004aad;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Login to CrickTrades</h2>
+        <form id="login-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autocomplete="username" />
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password" />
+            <button type="submit">Login</button>
+        </form>
+        <div class="message" id="login-message"></div>
+        <div class="forgot-password-link" style="text-align:center; margin-top: 10px;">
+            <a href="#" id="forgot-password-link">Forgot Password?</a>
+        </div>
+        <div class="signup-link">
+            Don't have an account? <a href="signup.html">Sign up here</a>
+        </div>
+        <div id="forgot-password-container" style="max-width: 400px; margin: 20px auto; display:none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 74, 173, 0.2);">
+            <h3>Forgot Password</h3>
+            <form id="forgot-password-email-form">
+                <label for="forgot-email">Enter your Email ID</label>
+                <input type="email" id="forgot-email" name="forgot-email" required />
+                <button type="submit">Submit</button>
+            </form>
+            <form id="forgot-password-security-form" style="display:none;">
+                <label id="security-question-label"></label>
+                <input type="text" id="security-answer" name="security-answer" required />
+                <button type="submit">Submit</button>
+            </form>
+            <form id="forgot-password-reset-form" style="display:none;">
+                <label for="new-password">Enter New Password</label>
+                <input type="password" id="new-password" name="new-password" required />
+                <label for="confirm-new-password">Confirm New Password</label>
+                <input type="password" id="confirm-new-password" name="confirm-new-password" required />
+                <button type="submit">Reset Password</button>
+            </form>
+            <div class="message" id="forgot-password-message"></div>
+        </div>
+    </div>
+        <script>
+            document.getElementById("login-form").addEventListener("submit", async function(e) {
+                e.preventDefault();
+                const username = this.username.value.trim();
+                const password = this.password.value;
+
+                if (!username || !password) {
+                    showMessage("Please enter both username and password.", true);
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        showMessage(data.message || 'Login failed.', true);
+                        return;
+                    }
+
+                    // Store token and user info in localStorage
+                    localStorage.setItem('cricktrades_token', data.token);
+                    localStorage.setItem('cricktrades_logged_in_user', JSON.stringify(data.user));
+
+                    showMessage("Login successful! Redirecting...", false);
+                    setTimeout(() => {
+                        window.location.href = "market.html";
+                    }, 1500);
+                } catch (error) {
+                    console.error('Error during login:', error);
+                    showMessage("An error occurred during login. Please try again later.", true);
+                }
+            });
+
+            // Forgot password flow
+            const forgotPasswordLink = document.getElementById('forgot-password-link');
+            const forgotPasswordContainer = document.getElementById('forgot-password-container');
+            const forgotEmailForm = document.getElementById('forgot-password-email-form');
+            const forgotSecurityForm = document.getElementById('forgot-password-security-form');
+            const forgotResetForm = document.getElementById('forgot-password-reset-form');
+            const securityQuestionLabel = document.getElementById('security-question-label');
+            const forgotPasswordMessage = document.getElementById('forgot-password-message');
+
+            let currentEmail = '';
+            let currentSecurityQuestion = '';
+
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                forgotPasswordContainer.style.display = 'block';
+                forgotEmailForm.style.display = 'block';
+                forgotSecurityForm.style.display = 'none';
+                forgotResetForm.style.display = 'none';
+                forgotPasswordMessage.textContent = '';
+            });
+
+            forgotEmailForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('forgot-email').value.trim();
+                if (!email) {
+                    forgotPasswordMessage.textContent = 'Please enter your email.';
+                    forgotPasswordMessage.style.color = 'red';
+                    return;
+                }
+                try {
+                    const response = await fetch('http://localhost:3001/api/forgot-password/request', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        forgotPasswordMessage.textContent = data.message || 'Error fetching security question.';
+                        forgotPasswordMessage.style.color = 'red';
+                        return;
+                    }
+                    currentEmail = email;
+                    currentSecurityQuestion = data.securityQuestion;
+                    securityQuestionLabel.textContent = currentSecurityQuestion;
+                    forgotEmailForm.style.display = 'none';
+                    forgotSecurityForm.style.display = 'block';
+                    forgotPasswordMessage.textContent = '';
+                } catch (error) {
+                    console.error('Error:', error);
+                    forgotPasswordMessage.textContent = 'An error occurred. Please try again later.';
+                    forgotPasswordMessage.style.color = 'red';
+                }
+            });
+
+            forgotSecurityForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const securityAnswer = document.getElementById('security-answer').value.trim();
+                if (!securityAnswer) {
+                    forgotPasswordMessage.textContent = 'Please enter your security answer.';
+                    forgotPasswordMessage.style.color = 'red';
+                    return;
+                }
+                try {
+                    const response = await fetch('http://localhost:3001/api/forgot-password/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: currentEmail, securityAnswer })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        forgotPasswordMessage.textContent = data.message || 'Security answer incorrect.';
+                        forgotPasswordMessage.style.color = 'red';
+                        return;
+                    }
+                    forgotSecurityForm.style.display = 'none';
+                    forgotResetForm.style.display = 'block';
+                    forgotPasswordMessage.textContent = '';
+                } catch (error) {
+                    console.error('Error:', error);
+                    forgotPasswordMessage.textContent = 'An error occurred. Please try again later.';
+                    forgotPasswordMessage.style.color = 'red';
+                }
+            });
+
+            forgotResetForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newPassword = document.getElementById('new-password').value;
+                const confirmNewPassword = document.getElementById('confirm-new-password').value;
+                if (!newPassword || !confirmNewPassword) {
+                    forgotPasswordMessage.textContent = 'Please fill in all password fields.';
+                    forgotPasswordMessage.style.color = 'red';
+                    return;
+                }
+                if (newPassword !== confirmNewPassword) {
+                    forgotPasswordMessage.textContent = 'Passwords do not match.';
+                    forgotPasswordMessage.style.color = 'red';
+                    return;
+                }
+                try {
+                    const response = await fetch('http://localhost:3001/api/forgot-password/reset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: currentEmail, newPassword })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        forgotPasswordMessage.textContent = data.message || 'Error resetting password.';
+                        forgotPasswordMessage.style.color = 'red';
+                        return;
+                    }
+                    forgotPasswordMessage.textContent = 'Password reset successful. You can now login.';
+                    forgotPasswordMessage.style.color = 'green';
+                    forgotResetForm.style.display = 'none';
+                } catch (error) {
+                    console.error('Error:', error);
+                    forgotPasswordMessage.textContent = 'An error occurred. Please try again later.';
+                    forgotPasswordMessage.style.color = 'red';
+                }
+            });
+
+            function showMessage(message, isError) {
+                const msgElem = document.getElementById("login-message");
+                msgElem.textContent = message;
+                msgElem.style.color = isError ? "red" : "green";
+            }
+        </script>
+</body>
+</html>

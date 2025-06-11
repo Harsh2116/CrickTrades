@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CrickTrades - KYC</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <header>
+        <h1>CrickTrades</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="market.html">Market</a>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="wallet.html">Wallet</a>
+            <a href="kyc.html" class="active">KYC</a>
+        </nav>
+    </header>
+    <main>
+        <h2>KYC Verification</h2>
+        <form id="kyc-form" class="kyc-form" enctype="multipart/form-data">
+            <label for="full-name">Holder Full Name:</label>
+            <input type="text" id="full-name" name="fullName" required />
+
+            <label for="pancard-number">PAN Card Number:</label>
+            <input type="text" id="pancard-number" name="pancardNumber" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" title="Enter valid PAN card number" required />
+
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" name="dob" required />
+
+            <label for="phone">Phone Number:</label>
+            <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" title="Enter 10 digit phone number" required />
+
+            <label for="pan-photo">Upload PAN Card Photo:</label>
+            <input type="file" id="pan-photo" name="panCardPhoto" accept="image/*" required />
+
+            <button type="submit" class="btn">Submit</button>
+        </form>
+        <div id="kyc-message" class="kyc-message"></div>
+    <script>
+        document.getElementById('kyc-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const token = localStorage.getItem('cricktrades_token');
+            if (!token) {
+                const messageDiv = document.getElementById('kyc-message');
+                messageDiv.textContent = 'User not authenticated. Please login.';
+                messageDiv.style.color = 'red';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3001/api/kyc', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                const result = await response.json();
+                const messageDiv = document.getElementById('kyc-message');
+                if (response.ok) {
+                    messageDiv.textContent = result.message || 'KYC submitted successfully.';
+                    messageDiv.style.color = 'green';
+                } else {
+                    messageDiv.textContent = result.message || 'Error submitting KYC.';
+                    messageDiv.style.color = 'red';
+                }
+            } catch (error) {
+                const messageDiv = document.getElementById('kyc-message');
+                messageDiv.textContent = 'Error submitting KYC.';
+                messageDiv.style.color = 'red';
+            }
+        });
+    </script>
+    </main>
+    <script src="script.js"></script>
+    <script src="script_additions.js"></script>
+    <script>
+        // Removed duplicate event listener to avoid conflicts
+    </script>
+</body>
+</html>

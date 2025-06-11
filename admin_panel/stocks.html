@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Panel - Manage Stocks</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 1rem;
+            background-color: #f9fafb;
+        }
+        h1 {
+            color: #004aad;
+        }
+        form {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        input[type="text"] {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 200px;
+        }
+        button {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #002f6c;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #004aad;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #d9534f;
+        }
+        .delete-btn:hover {
+            background-color: #c9302c;
+        }
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Manage Stocks</h1>
+    <div id="message" class="message" style="display:none;"></div>
+    <form id="addStockForm">
+        <input type="text" id="stockSymbol" placeholder="Stock Symbol" required />
+        <input type="text" id="stockName" placeholder="Stock Name" required />
+        <input type="number" id="stockPrice" placeholder="Stock Price" step="0.01" required />
+        <input type="number" id="stockVolume" placeholder="Stock Volume" required />
+        <button type="submit">Add Stock</button>
+    </form>
+    <table id="stocksTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Stock Symbol</th>
+                <th>Stock Name</th>
+                <th>Price</th>
+                <th>Volume</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Stocks will be populated here -->
+        </tbody>
+    </table>
+
+    <script>
+        const messageDiv = document.getElementById('message');
+        const stocksTableBody = document.querySelector('#stocksTable tbody');
+        const addStockForm = document.getElementById('addStockForm');
+
+        // Function to show messages
+        function showMessage(text, type = 'success') {
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Fetch and display stocks
+        async function fetchStocks() {
+            try {
+            const response = await fetch('http://localhost:3001/api/admin/stocks', {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('admin_token')
+                }
+            });
+                if (!response.ok) throw new Error('Failed to fetch stocks');
+                const data = await response.json();
+                stocksTableBody.innerHTML = '';
+                data.stocks.forEach(stock => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${stock.id}</td>
+                        <td>${stock.stock_symbol}</td>
+                        <td>${stock.stock_name}</td>
+                        <td>${Number(stock.price).toFixed(2)}</td>
+                        <td>${stock.volume}</td>
+                        <td><button class="delete-btn" data-id="${stock.id}">Delete</button></td>
+                    `;
+                    stocksTableBody.appendChild(row);
+                });
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        }
+
+        // Add stock
+        addStockForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const stock_symbol = document.getElementById('stockSymbol').value.trim();
+            const stock_name = document.getElementById('stockName').value.trim();
+            const price = parseFloat(document.getElementById('stockPrice').value);
+            const volume = parseInt(document.getElementById('stockVolume').value, 10);
+            if (!stock_symbol || !stock_name || isNaN(price) || isNaN(volume)) {
+                showMessage('Please enter stock symbol, name, price, and volume.', 'error');
+                return;
+            }
+            try {
+                const response = await fetch('http://localhost:3001/api/admin/stocks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('admin_token')
+                    },
+                    body: JSON.stringify({ stock_symbol, stock_name, price, volume })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Failed to add stock');
+                showMessage('Stock added successfully');
+                addStockForm.reset();
+                fetchStocks();
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        });
+
+        // Delete stock
+        stocksTableBody.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const stockId = e.target.getAttribute('data-id');
+                if (!confirm('Are you sure you want to delete this stock?')) return;
+                try {
+                    const response = await fetch('http://localhost:3001/api/admin/stocks/' + stockId, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem('admin_token')
+                        }
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.message || 'Failed to delete stock');
+                    showMessage('Stock deleted successfully');
+                    fetchStocks();
+                } catch (error) {
+                    showMessage(error.message, 'error');
+                }
+            }
+        });
+
+        // Initial fetch
+        fetchStocks();
+    </script>
+</body>
+</html>
