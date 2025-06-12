@@ -56,7 +56,7 @@
 
             async function fetchLeaderboard(contestId) {
                 try {
-                    const response = await fetch(`http://localhost:3001/api/leaderboard/${contestId}`, {
+                    const response = await fetch(`${BASE_URL}/api/leaderboard/${contestId}`, {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('cricktrades_token')}`
                         }

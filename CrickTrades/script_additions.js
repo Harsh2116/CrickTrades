@@ -28,7 +28,7 @@ async function fetchWallet() {
                 stockBuyingBalance: 10000,
             };
         }
-        const response = await fetch('http://localhost:3001/api/wallet', {
+        const response = await fetch(`${BASE_URL}/api/wallet`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -80,7 +80,7 @@ async function addMoney() {
         return;
     }
     try {
-        const response = await fetch('http://localhost:3001/api/wallet/add', {
+        const response = await fetch(`${BASE_URL}/api/wallet/add`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ async function withdrawMoney() {
         return;
     }
     try {
-        const response = await fetch('http://localhost:3001/api/wallet/withdraw', {
+        const response = await fetch(`${BASE_URL}/api/wallet/withdraw`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -201,7 +201,7 @@ async function renderTransactionTable() {
             console.error('User not authenticated');
             return;
         }
-        const response = await fetch('http://localhost:3001/api/transactions', {
+        const response = await fetch(`${BASE_URL}/api/transactions`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const response = await fetch('http://localhost:3001/api/kyc', {
+            const response = await fetch(`${BASE_URL}/api/kyc`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

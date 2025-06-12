@@ -3,7 +3,7 @@ let stocks = []; // Initialize empty, will be populated from backend or WebSocke
 // Function to fetch latest stock data from backend API
 async function fetchLatestStocks() {
     try {
-        const response = await fetch('http://localhost:3001/api/stocks');
+        const response = await fetch(`${BASE_URL}/api/stocks`);
         if (!response.ok) {
             console.error('Failed to fetch latest stocks');
             return [];
@@ -31,7 +31,7 @@ async function fetchTransactions() {
         if (!token) {
             return [];
         }
-        const response = await fetch('http://localhost:3001/api/transactions', {
+        const response = await fetch(`${BASE_URL}/api/transactions`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -176,7 +176,7 @@ async function loadPortfolio() {
         if (!token) {
             return {};
         }
-        const response = await fetch('http://localhost:3001/api/portfolio', {
+        const response = await fetch(`${BASE_URL}/api/portfolio`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -208,7 +208,7 @@ async function fetchPortfolio() {
         if (!token) {
             return {};
         }
-        const response = await fetch('http://localhost:3001/api/portfolio', {
+        const response = await fetch(`${BASE_URL}/api/portfolio`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -268,7 +268,7 @@ async function buyStock(symbol, quantity) {
         if (token) {
             const stock = stocks.find(s => s.symbol === symbol);
             console.log('Calling API /api/portfolio/buy with:', { symbol, quantity, price: stock.price, name: stock.name });
-            const response = await fetch('http://localhost:3001/api/portfolio/buy', {
+            const response = await fetch(`${BASE_URL}/api/portfolio/buy`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -306,7 +306,7 @@ async function buyStock(symbol, quantity) {
     try {
         const token = localStorage.getItem('cricktrades_token');
         if (token) {
-            const response = await fetch('http://localhost:3001/api/portfolio', {
+            const response = await fetch(`${BASE_URL}/api/portfolio`, {
                 headers: {
                     'Authorization': 'Bearer ' + token
                 }
@@ -360,7 +360,7 @@ async function sellStock(symbol, quantity) {
             alert('User not authenticated. Please login.');
             return;
         }
-        const response = await fetch('http://localhost:3001/api/portfolio/sell', {
+        const response = await fetch(`${BASE_URL}/api/portfolio/sell`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -380,7 +380,7 @@ async function sellStock(symbol, quantity) {
         alert(`Sold ${quantity} share(s) of ${symbol} for ₹${totalPrice.toLocaleString('en-IN')}`);
 
         // Fetch updated portfolio and wallet after successful sell
-        const updatedPortfolioResponse = await fetch('http://localhost:3001/api/portfolio', {
+        const updatedPortfolioResponse = await fetch(`${BASE_URL}/api/portfolio`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -401,7 +401,7 @@ async function sellStock(symbol, quantity) {
             }
         }
 
-        const updatedWalletResponse = await fetch('http://localhost:3001/api/wallet', {
+        const updatedWalletResponse = await fetch(`${BASE_URL}/api/wallet`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -513,8 +513,7 @@ function connectWebSocket() {
         return;
     }
 
-    // Replace with your backend WebSocket URL
-    const wsUrl = "ws://localhost:3001";
+const wsUrl = `${BASE_URL.replace(/^http/, 'ws')}`;
 
     ws = new WebSocket(wsUrl);
 
@@ -616,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // Fetch all contests from backend API
 async function fetchContests() {
     try {
-        const response = await fetch('http://localhost:3001/api/contests');
+        const response = await fetch(`${BASE_URL}/api/contests`);
         if (!response.ok) {
             console.error('Failed to fetch contests');
             return [];
@@ -636,7 +635,7 @@ async function fetchJoinedContests() {
         if (!token) {
             return { activeContests: [], completedContests: [] };
         }
-        const response = await fetch('http://localhost:3001/api/joined-contests', {
+        const response = await fetch(`${BASE_URL}/api/joined-contests`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -667,7 +666,7 @@ async function renderContests() {
     // Fetch winning prizes for contests
     let winningPrizes = {};
     try {
-        const response = await fetch('http://localhost:3001/api/contest-winning-prizes');
+        const response = await fetch(`${BASE_URL}/api/contest-winning-prizes`);
         if (response.ok) {
             const data = await response.json();
             winningPrizes = data.winningPrizes || {};
@@ -760,7 +759,7 @@ async function joinContest(contestId) {
         return;
     }
     try {
-        const response = await fetch('http://localhost:3001/api/join-contest', {
+        const response = await fetch(`${BASE_URL}/api/join-contest`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -789,7 +788,7 @@ async function fetchKYC() {
         if (!token) {
             return null;
         }
-        const response = await fetch('http://localhost:3001/api/kyc', {
+        const response = await fetch(`${BASE_URL}/api/kyc`, {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
@@ -845,7 +844,7 @@ async function saveKYC() {
             alert('User not authenticated.');
             return;
         }
-        const response = await fetch('http://localhost:3001/api/kyc', {
+        const response = await fetch(`${BASE_URL}/api/kyc`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
