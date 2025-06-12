@@ -5,7 +5,6 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const http = require('http');
 const pool = require('./db');
-const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
 
@@ -15,7 +14,45 @@ const forgotPasswordRouter = require('./forgotPassword');
 const debugQueriesRouter = require('./debugQueries');
 
 const app = express();
+
+const path = require('path');
+// ✅ First: Serve admin panel at /admin
+app.use('/admin', express.static(path.join(__dirname, '../admin_panel')));
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin_panel/login.html')); // or use another admin file like reports.html
+});
+
+// ✅ Then: Serve main website at /
+app.use('/', express.static(path.join(__dirname, '../CrickTrades')));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../CrickTrades/index.html'));
+});
+
 const PORT = process.env.PORT || 3001;
+const server = http.createServer(app);
+initWebSocketServer(server);
+
+server.on('upgrade', (request, socket, head) => {
+    handleUpgrade(request, socket, head);
+});
+
+if (require.main === module) {
+    server.listen(PORT, () => {
+        console.log(`Backend server running on http://localhost:${PORT}`);
+
+        // ✅ MySQL test connection using async/await
+        (async () => {
+            try {
+                await pool.query('SELECT 1');
+                console.log('✅ MySQL connection successful!');
+            } catch (err) {
+                console.error('❌ MySQL connection failed:', err.message);
+            }
+        })();
+    });
+}
+
+
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
 
 // Setup multer for file uploads
@@ -52,20 +89,23 @@ app.get('/api/stocks', (req, res) => {
 const contestWinningPrizesRouter = require('./api_contest_winning_prizes');
 app.use('/api', contestWinningPrizesRouter);
 
-const adminRouter = require('./admin');
+const adminAuthRouter = require('./adminAuth');
+const adminUsersRouter = require('./adminUsers');
+const adminContestsRouter = require('./adminContests');
+const adminFinanceRouter = require('./adminFinance');
 const adminReportsRouter = require('./adminReports');
+const adminPrizesRouter = require('./adminPrizes');
 const prizeDistributionRouter = require('./prizeDistribution');
 
-app.use('/api', adminRouter);
-app.use('/api/admin/reports', adminReportsRouter);
+app.use('/api/admin', adminAuthRouter);
+app.use('/api/admin', adminUsersRouter);
+app.use('/api/admin', adminContestsRouter);
+app.use('/api/admin', adminFinanceRouter);
+app.use('/api/admin', adminReportsRouter);
+app.use('/api/admin', adminPrizesRouter);
 app.use('/api/prizeDistribution', prizeDistributionRouter);
 
-// Add KYC admin router for admin KYC APIs
-const adminKycRouter = require('./admin');
-app.use('/api/admin', adminKycRouter);
 
-// Serve admin panel static files
-app.use('/admin', express.static(path.join(__dirname, 'admin_panel')));
 
 // Middleware to authenticate JWT token and set req.user
 const authenticateToken = (req, res, next) => {
@@ -87,22 +127,7 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// New API to get pending withdrawal requests for admin finance page
-app.get('/api/admin/finance/withdrawal-requests', authenticateToken, async (req, res) => {
-    try {
-        const [rows] = await pool.query(
-            `SELECT t.id, t.user_id, u.full_name, u.username, t.amount, t.type AS method, t.transaction_date AS request_date
-             FROM transactions t
-             JOIN users u ON t.user_id = u.id
-             WHERE t.type = 'Withdraw to' OR t.type LIKE 'Withdraw to %'
-             ORDER BY t.transaction_date DESC`
-        );
-        res.json({ withdrawalRequests: rows });
-    } catch (err) {
-        console.error('Error fetching withdrawal requests:', err);
-        res.status(500).json({ message: 'Error fetching withdrawal requests' });
-    }
-});
+
 
 // Signup endpoint
 app.post('/api/signup', async (req, res) => {
@@ -588,23 +613,6 @@ app.post('/api/kyc', authenticateToken, upload.single('panCardPhoto'), async (re
 });
 
 // Create HTTP server and initialize WebSocket server
-const server = http.createServer((req, res) => {
-  if (req.url === '/admin' || req.url === '/admin/') {
-    const filePath = path.join(__dirname, '../admin/index.html');
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        res.writeHead(500);
-        res.end('Error loading admin panel');
-      } else {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(data);
-      }
-    });
-  } else {
-    server.emit('request', req, res);
-  }
-});
-
 initWebSocketServer(server);
 
 // Add upgrade event listener to handle WebSocket upgrade requests
@@ -658,13 +666,6 @@ app.post('/api/wallet/add', authenticateToken, async (req, res) => {
         return res.status(500).json({ message: 'Error adding money to wallet' });
     }
 });
-
-if (require.main === module) {
-    server.listen(PORT, () => {
-        console.log(`Backend server running on http://localhost:${PORT}`);
-    });
-}
-
 // Withdraw money from wallet main balance with TDS deduction
 app.post('/api/wallet/withdraw', authenticateToken, async (req, res) => {
     const { amount, paymentInfo } = req.body;
