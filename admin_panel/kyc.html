@@ -45,6 +45,7 @@
         </table>
     </main>
     <script>
+        const BASE_URL = window.location.origin;
         async function fetchKycDetails() {
             try {
                 const token = localStorage.getItem('admin_token');
@@ -52,7 +53,7 @@
                     alert('Admin not authenticated. Please login.');
                     return;
                 }
-                const response = await fetch('http://localhost:3001/api/admin/kyc-details', {
+                const response = await fetch(`${BASE_URL}/api/admin/kyc-details`, {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }

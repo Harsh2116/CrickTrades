@@ -49,12 +49,13 @@
     </table>
 
     <script>
+        const BASE_URL = window.location.origin;
         const transactionsTableBody = document.querySelector('#transactionsTable tbody');
 
         async function fetchTransactions() {
             try {
                 const token = localStorage.getItem('admin_token');
-                const response = await fetch('http://localhost:3001/api/admin/transactions', {
+                const response = await fetch(`${BASE_URL}/api/admin/transactions`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (!response.ok) {

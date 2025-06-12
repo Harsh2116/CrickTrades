@@ -74,13 +74,14 @@
     <div class="message" id="message"></div>
 
     <script>
+        const BASE_URL = window.location.origin;
         const token = localStorage.getItem('admin_token');
         const winnersTableBody = document.querySelector('#winnersTable tbody');
         const messageDiv = document.getElementById('message');
 
         async function fetchWinners() {
             try {
-                const res = await fetch('http://localhost:3001/api/prizeDistribution/admin/contest-winners', {
+                const res = await fetch(`${BASE_URL}/api/prizeDistribution/admin/contest-winners`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (!res.ok) throw new Error('Failed to fetch contest winners');
@@ -134,7 +135,7 @@
                 return;
             }
             try {
-                const res = await fetch(`http://localhost:3001/api/prizeDistribution/admin/users/${userId}/add-money`, {
+                const res = await fetch(`${BASE_URL}/api/prizeDistribution/admin/users/${userId}/add-money`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -100,6 +100,7 @@
     </div>
 
     <script>
+        const BASE_URL = window.location.origin;
         const usersTableBody = document.querySelector('#usersTable tbody');
         const editUserForm = document.getElementById('editUserForm');
         const editUserId = document.getElementById('editUserId');
@@ -111,7 +112,7 @@
         async function fetchUsers() {
             try {
                 const token = localStorage.getItem('admin_token');
-                const response = await fetch('http://localhost:3001/api/admin/users', {
+                const response = await fetch(`${BASE_URL}/api/admin/users`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (!response.ok) {
@@ -163,7 +164,7 @@
 
             try {
                 const token = localStorage.getItem('admin_token');
-                const response = await fetch('http://localhost:3001/api/admin/users/' + id, {
+                const response = await fetch(`${BASE_URL}/api/admin/users/` + id, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -186,7 +187,7 @@
             if (!confirm('Are you sure you want to delete this user?')) return;
             try {
                 const token = localStorage.getItem('admin_token');
-                const response = await fetch('http://localhost:3001/api/admin/users/' + id, {
+                const response = await fetch(`${BASE_URL}/api/admin/users/` + id, {
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });

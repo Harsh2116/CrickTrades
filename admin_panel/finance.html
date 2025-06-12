@@ -119,11 +119,12 @@
     </section>
 
     <script>
+        const BASE_URL = window.location.origin;
         const token = localStorage.getItem('admin_token');
 
         async function fetchFinanceSummary() {
             try {
-                const res = await fetch('http://localhost:3001/api/admin/finance/summary', {
+                const res = await fetch(`${BASE_URL}/api/admin/finance/summary`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (!res.ok) throw new Error('Failed to fetch finance summary');
@@ -154,7 +155,7 @@
 
         async function fetchUserCollections() {
             try {
-                const res = await fetch('http://localhost:3001/api/admin/finance/user-collections', {
+                const res = await fetch(`${BASE_URL}/api/admin/finance/user-collections`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (!res.ok) throw new Error('Failed to fetch user collections');
@@ -187,7 +188,7 @@
 
         async function fetchWithdrawalRequests() {
             try {
-                const res = await fetch('http://localhost:3001/api/admin/finance/withdrawal-requests', {
+                const res = await fetch(`${BASE_URL}/api/admin/finance/withdrawal-requests`, {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
                 if (!res.ok) throw new Error('Failed to fetch withdrawal requests');
