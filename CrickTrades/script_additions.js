@@ -1,3 +1,5 @@
+const BASE_URL = window.location.origin;
+
 async function renderWallet() {
     const wallet = await fetchWallet();
 

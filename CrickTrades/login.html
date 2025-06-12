@@ -108,6 +108,8 @@
         </div>
     </div>
         <script>
+            const BASE_URL = window.location.origin;
+
             document.getElementById("login-form").addEventListener("submit", async function(e) {
                 e.preventDefault();
                 const username = this.username.value.trim();
