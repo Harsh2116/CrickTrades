@@ -1,7 +1,5 @@
 let stocks = []; // Initialize empty, will be populated from backend or WebSocket
 
-const BASE_URL = window.location.origin;
-
 // Function to fetch latest stock data from backend API
 async function fetchLatestStocks() {
     try {
