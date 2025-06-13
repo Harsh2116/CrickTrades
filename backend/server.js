@@ -615,11 +615,6 @@ app.post('/api/kyc', authenticateToken, upload.single('panCardPhoto'), async (re
 // Create HTTP server and initialize WebSocket server
 initWebSocketServer(server);
 
-// Add upgrade event listener to handle WebSocket upgrade requests
-server.on('upgrade', (request, socket, head) => {
-    handleUpgrade(request, socket, head);
-});
-
 // Add money to wallet main balance
 app.post('/api/wallet/add', authenticateToken, async (req, res) => {
     const { amount } = req.body;
