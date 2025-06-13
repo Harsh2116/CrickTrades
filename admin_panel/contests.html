@@ -1,4 +1,4 @@
-node backend/server.js<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -179,8 +179,8 @@ node backend/server.js<!DOCTYPE html>
             const name = contestNameInput.value.trim();
             const entry_fee = parseFloat(entryFeeInput.value);
             const contest_type = contestTypeInput.value.trim();
-            const start_time = startTimeInput.value;
-            const end_time = endTimeInput.value;
+            const start_time = new Date(startTimeInput.value).toISOString();
+            const end_time = new Date(endTimeInput.value).toISOString();
             const prize_pool = parseFloat(prizePoolInput.value);
 
             const token = localStorage.getItem('admin_token');
