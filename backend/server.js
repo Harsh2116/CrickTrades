@@ -95,7 +95,6 @@ const adminContestsRouter = require('./adminContests');
 const adminFinanceRouter = require('./adminFinance');
 const adminReportsRouter = require('./adminReports');
 const adminPrizesRouter = require('./adminPrizes');
-const adminStocksRouter = require('./adminStocks');
 const prizeDistributionRouter = require('./prizeDistribution');
 
 app.use('/api/admin', adminAuthRouter);
