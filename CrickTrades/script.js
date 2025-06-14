@@ -23,6 +23,50 @@ const WALLET_KEY = "cricktrades_wallet";
 function saveWallet(wallet) {
     localStorage.setItem("cricktrades_wallet", JSON.stringify(wallet));
 }
+// Fetch wallet data from backend API
+async function fetchWallet() {
+    try {
+        const token = localStorage.getItem('cricktrades_token');
+        if (!token) {
+            return {
+                mainBalance: 0,
+                withdrawBalance: 0,
+                referralBonus: 0,
+                stockBuyingBalance: 10000,
+            };
+        }
+        const response = await fetch(`${BASE_URL}/api/wallet`, {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        if (!response.ok) {
+            console.error('Failed to fetch wallet');
+            return {
+                mainBalance: 0,
+                withdrawBalance: 0,
+                referralBonus: 0,
+                stockBuyingBalance: 10000,
+            };
+        }
+        const data = await response.json();
+        const wallet = data.wallet;
+        return {
+            mainBalance: wallet.main_balance,
+            withdrawBalance: wallet.withdraw_balance,
+            referralBonus: wallet.referral_bonus,
+            stockBuyingBalance: wallet.stock_buying_balance,
+        };
+    } catch (error) {
+        console.error('Error fetching wallet:', error);
+        return {
+            mainBalance: 0,
+            withdrawBalance: 0,
+            referralBonus: 0,
+            stockBuyingBalance: 10000,
+        };
+    }
+}
 
 // Fetch user transactions from backend API
 async function fetchTransactions() {
