@@ -40,4 +40,23 @@ router.delete('/users/:id', authenticateAdminToken, async (req, res) => {
     }
 });
 
+// API endpoint to get KYC details for admin panel
+router.get('/kyc-details', authenticateAdminToken, async (req, res) => {
+    try {
+        const query = `
+            SELECT u.id AS user_id, u.username, u.full_name, u.pancard_number, u.dob, u.phone, p.pan_card_photo
+            FROM users u
+            LEFT JOIN pan_card_photos p ON u.id = p.user_id
+            WHERE u.kyc_status = 'approved'
+            ORDER BY u.id DESC
+        `;
+        const [rows] = await pool.query(query);
+        res.json({ kycDetails: rows });
+    } catch (err) {
+        console.error('Error fetching KYC details:', err);
+        res.status(500).json({ message: 'Error fetching KYC details' });
+    }
+});
+
 module.exports = router;
+
