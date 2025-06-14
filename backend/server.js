@@ -103,7 +103,6 @@ app.use('/api/admin', adminContestsRouter);
 app.use('/api/admin', adminFinanceRouter);
 app.use('/api/admin', adminReportsRouter);
 app.use('/api/admin', adminPrizesRouter);
-app.use('/api/admin', adminStocksRouter);
 app.use('/api/prizeDistribution', prizeDistributionRouter);
 
 
