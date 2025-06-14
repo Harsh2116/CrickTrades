@@ -6,6 +6,7 @@ let stocks = [
     { symbol: "INFY", name: "Infosys", price: 1500, volume: 1000000 },
     { symbol: "HDFCBANK", name: "HDFC Bank", price: 1400, volume: 1000000 },
     { symbol: "ICICIBANK", name: "ICICI Bank", price: 700, volume: 1000000 },
+    { symbol: "SBIBANK", name: "SBI Bank", price: 800, volume: 1000000 },
 ];
 
 // WebSocket server instance
