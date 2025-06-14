@@ -1,6 +1,4 @@
-if (typeof BASE_URL === 'undefined') {
-    var BASE_URL = window.location.origin;
-}
+const BASE_URL = window.location.origin;
 
 async function renderWallet() {
     const wallet = await fetchWallet();
