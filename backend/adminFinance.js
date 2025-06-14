@@ -118,4 +118,22 @@ router.get('/finance/transaction-types', authenticateAdminToken, async (req, res
     }
 });
 
+// API endpoint to get all transactions for admin panel
+router.get('/transactions', authenticateAdminToken, async (req, res) => {
+    try {
+        const query = `
+            SELECT id, user_id, type, amount, transaction_date
+            FROM transactions
+            ORDER BY transaction_date DESC
+            LIMIT 100
+        `;
+        const [rows] = await pool.query(query);
+        res.json({ transactions: rows });
+    } catch (err) {
+        console.error('Error fetching transactions:', err);
+        res.status(500).json({ message: 'Error fetching transactions' });
+    }
+});
+
 module.exports = router;
+
