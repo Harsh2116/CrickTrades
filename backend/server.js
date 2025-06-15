@@ -574,13 +574,27 @@ app.post('/api/join-contest', authenticateToken, async (req, res) => {
 });
 
 // Create or update KYC details for authenticated user with file upload
-app.post('/api/kyc', authenticateToken, upload.single('panCardPhoto'), async (req, res) => {
-    const { fullName, pancardNumber, dob, phone } = req.body;
-    if (!fullName || !pancardNumber || !dob || !phone) {
+const aadharUpload = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = path.join(__dirname, 'uploads', 'aadhar_photos');
+        fs.mkdirSync(uploadDir, { recursive: true });
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    }
+});
+const aadharUploadMiddleware = multer({ storage: aadharUpload });
+
+app.post('/api/kyc', authenticateToken, aadharUploadMiddleware.single('aadharCardPhoto'), async (req, res) => {
+    const { fullName, aadharNumber, dob, phone } = req.body;
+    if (!fullName || !aadharNumber || !dob || !phone) {
         return res.status(400).json({ message: 'Missing required KYC fields' });
     }
     if (!req.file) {
-        return res.status(400).json({ message: 'PAN card photo is required' });
+        return res.status(400).json({ message: 'Aadhar card photo is required' });
     }
     try {
         const [userRows] = await pool.query('SELECT id FROM users WHERE username = ?', [req.user.username]);
@@ -589,20 +603,20 @@ app.post('/api/kyc', authenticateToken, upload.single('panCardPhoto'), async (re
         }
         const userId = userRows[0].id;
 
-        const panCardPhotoPath = path.relative(__dirname, req.file.path).replace(/\\/g, '/');
+        const aadharCardPhotoPath = path.relative(__dirname, req.file.path).replace(/\\/g, '/');
 
         const [existingRows] = await pool.query('SELECT id FROM kyc WHERE user_id = ?', [userId]);
         if (existingRows.length > 0) {
             // Update existing KYC
             await pool.query(
-                'UPDATE kyc SET full_name = ?, pancard_number = ?, dob = ?, phone = ?, pan_card_photo = ? WHERE user_id = ?',
-                [fullName, pancardNumber, dob, phone, panCardPhotoPath, userId]
+                'UPDATE kyc SET full_name = ?, aadhar_number = ?, dob = ?, phone = ?, aadhar_card_photo = ? WHERE user_id = ?',
+                [fullName, aadharNumber, dob, phone, aadharCardPhotoPath, userId]
             );
         } else {
             // Insert new KYC
             await pool.query(
-                'INSERT INTO kyc (user_id, full_name, pancard_number, dob, phone, pan_card_photo) VALUES (?, ?, ?, ?, ?, ?)',
-                [userId, fullName, pancardNumber, dob, phone, panCardPhotoPath]
+                'INSERT INTO kyc (user_id, full_name, aadhar_number, dob, phone, aadhar_card_photo) VALUES (?, ?, ?, ?, ?, ?)',
+                [userId, fullName, aadharNumber, dob, phone, aadharCardPhotoPath]
             );
         }
         return res.json({ message: 'KYC details saved successfully' });

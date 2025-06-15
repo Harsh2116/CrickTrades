@@ -26,8 +26,8 @@
             <label for="full-name">Holder Full Name:</label>
             <input type="text" id="full-name" name="fullName" required />
 
-            <label for="pancard-number">PAN Card Number:</label>
-            <input type="text" id="pancard-number" name="pancardNumber" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" title="Enter valid PAN card number" required />
+            <label for="aadhar-number">Aadhar Card Number:</label>
+            <input type="text" id="aadhar-number" name="aadharNumber" pattern="[0-9]{12}" title="Enter valid 12 digit Aadhar card number" required />
 
             <label for="dob">Date of Birth:</label>
             <input type="date" id="dob" name="dob" required />
@@ -35,8 +35,8 @@
             <label for="phone">Phone Number:</label>
             <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" title="Enter 10 digit phone number" required />
 
-            <label for="pan-photo">Upload PAN Card Photo:</label>
-            <input type="file" id="pan-photo" name="panCardPhoto" accept="image/*" required />
+            <label for="aadhar-photo">Upload Aadhar Card Photo:</label>
+            <input type="file" id="aadhar-photo" name="aadharCardPhoto" accept="image/*" required />
 
             <button type="submit" class="btn">Submit</button>
         </form>
