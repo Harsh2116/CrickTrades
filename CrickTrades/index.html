@@ -1,137 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CrickTrades - Home</title>
-    <link rel="stylesheet" href="styles.css" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9fafb;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #004aad;
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 1.8rem;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 1.5rem;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        main {
-            max-width: 1000px;
-            margin: 3rem auto;
-            padding: 0 1rem;
-        }
-        .intro-box {
-            background: #004aad;
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 74, 173, 0.3);
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        .intro-box h2 {
-            font-size: 2.8rem;
-            margin-bottom: 1rem;
-        }
-        .intro-box p {
-            font-size: 1.3rem;
-            line-height: 1.6;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-        .features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            justify-content: center;
-        }
-        .feature-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 74, 173, 0.15);
-            padding: 1.5rem;
-            flex: 1 1 280px;
-            max-width: 300px;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-        .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 25px rgba(0, 74, 173, 0.3);
-        }
-        .feature-card h3 {
-            color: #004aad;
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-        .feature-card p {
-            color: #555;
-            font-size: 1.1rem;
-            line-height: 1.5;
-        }
-        footer {
-            text-align: center;
-            padding: 1rem;
-            color: #777;
-            font-size: 0.9rem;
-            margin-top: 4rem;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CrickTrades - Home</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #004aad;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 3rem auto;
+      padding: 0 1rem;
+    }
+
+    .intro-box {
+      background: #004aad;
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 74, 173, 0.3);
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .intro-box h2 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .intro-box p {
+      font-size: 1.3rem;
+      line-height: 1.6;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 74, 173, 0.15);
+      padding: 1.5rem;
+      flex: 1 1 280px;
+      max-width: 300px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 25px rgba(0, 74, 173, 0.3);
+    }
+
+    .feature-card h3 {
+      color: #004aad;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .feature-card p {
+      color: #555;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background-color: #222;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    #legal-info {
+      padding: 40px 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    #legal-info h3 {
+      margin-top: 30px;
+    }
+
+    #legal-info a {
+      color: #0d47a1;
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>CrickTrades</h1>
-        <nav>
-            <a href="login.html">Login</a>
-            <a href="signup.html">Sign up</a>
-            <a href="how_it_works.html">How It Works</a>
-        </nav>
-    </header>
-    <main>
-        <section class="intro-box">
-            <h2>Why CrickTrades is the Ultimate Fantasy Cricket Platform for Indian Youth</h2>
-            <p>
-               CrickTrades is a next-gen fantasy cricket platform for Indian fans. With real-time market data, exciting contests, secure wallets, and a sleek interface, we turn your cricket knowledge into real rewards. Join thousands already playing smarter with CrickTrades!
-            </p>
-        </section>
-        <section class="features">
-            <div class="feature-card">
-                <h3>Real-Time Market Data</h3>
-                <p>Stay ahead with live updates and dynamic player stats that help you make informed decisions and build winning teams.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Exciting Contests</h3>
-                <p>Participate in daily and weekly contests with attractive prizes and a high winning percentage to keep the excitement alive.</p>
-            </div>
-            <div class="feature-card">
-                <h3>User-Friendly Interface</h3>
-                <p>Enjoy a seamless and intuitive platform designed for cricket fans of all levels, making fantasy cricket fun and accessible.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Secure Wallet & Transactions</h3>
-                <p>Manage your funds effortlessly with our secure wallet system, ensuring safe deposits, withdrawals, and contest entries.</p>
-            </div>
-        </section>
-    </main>
-    <script src="script_additions.js"></script>
+  <header>
+    <h1>CrickTrades</h1>
+    <nav>
+      <a href="login.html">Login</a>
+      <a href="signup.html">Sign up</a>
+      <a href="how_it_works.html">How It Works</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro-box">
+      <h2>Why CrickTrades is the Ultimate Fantasy Cricket Platform for Indian Youth</h2>
+      <p>
+        CrickTrades is a next-gen fantasy cricket platform for Indian fans. With real-time market data, exciting contests, secure wallets, and a sleek interface, we turn your cricket knowledge into real rewards. Join thousands already playing smarter with CrickTrades!
+      </p>
+    </section>
+
+    <section class="features">
+      <div class="feature-card">
+        <h3>Real-Time Market Data</h3>
+        <p>Stay ahead with live updates and dynamic player stats that help you make informed decisions and build winning teams.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Exciting Contests</h3>
+        <p>Participate in daily and weekly contests with attractive prizes and a high winning percentage to keep the excitement alive.</p>
+      </div>
+      <div class="feature-card">
+        <h3>User-Friendly Interface</h3>
+        <p>Enjoy a seamless and intuitive platform designed for cricket fans of all levels, making fantasy cricket fun and accessible.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Secure Wallet & Transactions</h3>
+        <p>Manage your funds effortlessly with our secure wallet system, ensuring safe deposits, withdrawals, and contest entries.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a href="#terms">Terms</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#refund">Refund</a>
+    <a href="#shipping">Shipping</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="#pricing">Pricing</a>
+  </footer>
+
+  <div id="legal-info">
+    <h2>Legal & Information</h2>
+
+    <h3 id="terms">Terms and Conditions</h3>
+    <p>By using CrickTrades, you agree to our terms. Users must be 18+ to participate. All trades are final, and misuse of the platform is strictly prohibited.</p>
+
+    <h3 id="privacy">Privacy Policy</h3>
+    <p>We only collect necessary data like your name, mobile number, and payment info. Your data is secure and never shared without your permission.</p>
+
+    <h3 id="refund">Refund & Cancellation Policy</h3>
+    <p>Once a contest entry is submitted, it cannot be canceled. Refunds for payment issues (like double charges) are processed within 5–7 working days to your original payment method.</p>
+
+    <h3 id="shipping">Shipping & Delivery Policy</h3>
+    <p>CrickTrades is a digital platform. We do not sell or ship physical products. All services are provided instantly online.</p>
+
+    <h3 id="about">About Us</h3>
+    <p>CrickTrades is India’s first fantasy stock market based on cricket. Users can buy/sell virtual player shares, join contests, and win rewards based on real player performance.</p>
+
+    <h3 id="contact">Contact Us</h3>
+    <p>
+      Email: <a href="mailto:support@cricktrades.com">support@cricktrades.com</a><br>
+      Phone: +91 9509941946<br>
+      Address: CrickTrades Pvt Ltd, [Your Operational Address], India
+    </p>
+
+    <h3 id="pricing">Pricing Details</h3>
+    <p>Virtual player shares have dynamic prices based on demand and performance. Contest entry fees are fixed and displayed before joining. No hidden charges; taxes are included.</p>
+
+    <p style="margin-top: 30px; font-weight: bold;">© 2025 CrickTrades Pvt Ltd. All rights reserved.</p>
+  </div>
+
+  <script src="script_additions.js"></script>
 </body>
 </html>
