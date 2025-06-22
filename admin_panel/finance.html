@@ -118,6 +118,26 @@
         </table>
     </section>
 
+    <section id="addMoneyRequestsSection" style="margin-top: 2rem;">
+        <h2>Pending Add Money Requests</h2>
+        <table id="addMoneyRequestsTable">
+            <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>User ID</th>
+                    <th>Full Name</th>
+                    <th>Username</th>
+                    <th>Amount</th>
+                    <th>Request Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="7" class="loading">Loading add money requests...</td></tr>
+            </tbody>
+        </table>
+    </section>
+
     <script>
         const BASE_URL = window.location.origin;
         const token = localStorage.getItem('admin_token');
@@ -226,6 +246,93 @@
         fetchFinanceSummary();
         fetchUserCollections();
         fetchWithdrawalRequests();
+        fetchAddMoneyRequests();
+
+        async function fetchAddMoneyRequests() {
+            try {
+                const res = await fetch(`${BASE_URL}/api/admin/finance/add-money-requests`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('Failed to fetch add money requests');
+                const data = await res.json();
+                populateAddMoneyRequestsTable(data.addMoneyRequests);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function populateAddMoneyRequestsTable(requests) {
+            const tbody = document.querySelector('#addMoneyRequestsTable tbody');
+            tbody.innerHTML = '';
+            if (requests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">No pending add money requests</td></tr>';
+                return;
+            }
+            requests.forEach(req => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${req.id}</td>
+                    <td>${req.user_id}</td>
+                    <td>${req.full_name}</td>
+                    <td>${req.username}</td>
+                    <td>${req.amount}</td>
+                    <td>${new Date(req.request_date).toLocaleString()}</td>
+                    <td>
+                        <button onclick="approveAddMoneyRequest(${req.id})">Approve</button>
+                        <button onclick="rejectAddMoneyRequest(${req.id})">Reject</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function approveAddMoneyRequest(requestId) {
+            if (!confirm('Are you sure you want to approve this add money request?')) return;
+            try {
+                const res = await fetch(`${BASE_URL}/api/admin/finance/approve-add-money`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ requestId })
+                });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    alert('Failed to approve request: ' + errorData.message);
+                    return;
+                }
+                alert('Add money request approved.');
+                fetchAddMoneyRequests();
+            } catch (err) {
+                console.error(err);
+                alert('Error approving add money request.');
+            }
+        }
+
+        async function rejectAddMoneyRequest(requestId) {
+            if (!confirm('Are you sure you want to reject this add money request?')) return;
+            try {
+                const res = await fetch(`${BASE_URL}/api/admin/finance/reject-add-money`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ requestId })
+                });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    alert('Failed to reject request: ' + errorData.message);
+                    return;
+                }
+                alert('Add money request rejected.');
+                fetchAddMoneyRequests();
+            } catch (err) {
+                console.error(err);
+                alert('Error rejecting add money request.');
+            }
+        }
     </script>
 </body>
 </html>

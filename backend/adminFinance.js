@@ -135,5 +135,78 @@ router.get('/transactions', authenticateAdminToken, async (req, res) => {
     }
 });
 
+// Add Money Requests - List pending requests
+router.get('/finance/add-money-requests', authenticateAdminToken, async (req, res) => {
+    try {
+        const query = `
+            SELECT r.id, r.user_id, u.full_name, u.username, r.amount, r.status, r.request_date
+            FROM add_money_requests r
+            JOIN users u ON r.user_id = u.id
+            WHERE r.status = 'pending'
+            ORDER BY r.request_date DESC
+        `;
+        const [rows] = await pool.query(query);
+        res.json({ addMoneyRequests: rows });
+    } catch (err) {
+        console.error('Error fetching add money requests:', err);
+        res.status(500).json({ message: 'Error fetching add money requests' });
+    }
+});
+
+// Approve Add Money Request
+router.post('/finance/approve-add-money', authenticateAdminToken, async (req, res) => {
+    const { requestId } = req.body;
+    const adminId = req.admin.id;
+    if (!requestId) {
+        return res.status(400).json({ message: 'Request ID is required' });
+    }
+    try {
+        // Get the request details
+        const [requests] = await pool.query('SELECT * FROM add_money_requests WHERE id = ? AND status = "pending"', [requestId]);
+        if (requests.length === 0) {
+            return res.status(404).json({ message: 'Add money request not found or already processed' });
+        }
+        const request = requests[0];
+
+        // Update user's wallet balance
+        await pool.query('UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?', [request.amount, request.user_id]);
+
+        // Mark request as approved
+        await pool.query('UPDATE add_money_requests SET status = "approved", processed_date = NOW(), processed_by = ? WHERE id = ?', [adminId, requestId]);
+
+        // Insert transaction record
+        await pool.query('INSERT INTO transactions (user_id, type, amount, transaction_date) VALUES (?, "Add Money", ?, NOW())', [request.user_id, request.amount]);
+
+        res.json({ message: 'Add money request approved and wallet updated' });
+    } catch (err) {
+        console.error('Error approving add money request:', err);
+        res.status(500).json({ message: 'Error approving add money request' });
+    }
+});
+
+// Reject Add Money Request
+router.post('/finance/reject-add-money', authenticateAdminToken, async (req, res) => {
+    const { requestId } = req.body;
+    const adminId = req.admin.id;
+    if (!requestId) {
+        return res.status(400).json({ message: 'Request ID is required' });
+    }
+    try {
+        // Check if request exists and is pending
+        const [requests] = await pool.query('SELECT * FROM add_money_requests WHERE id = ? AND status = "pending"', [requestId]);
+        if (requests.length === 0) {
+            return res.status(404).json({ message: 'Add money request not found or already processed' });
+        }
+
+        // Mark request as rejected
+        await pool.query('UPDATE add_money_requests SET status = "rejected", processed_date = NOW(), processed_by = ? WHERE id = ?', [adminId, requestId]);
+
+        res.json({ message: 'Add money request rejected' });
+    } catch (err) {
+        console.error('Error rejecting add money request:', err);
+        res.status(500).json({ message: 'Error rejecting add money request' });
+    }
+});
+
 module.exports = router;
 

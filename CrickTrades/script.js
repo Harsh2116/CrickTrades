@@ -698,6 +698,45 @@ document.addEventListener("DOMContentLoaded", () => {
         renderContests();
     } else if (path.endsWith("my_contest.html")) {
         renderJoinedContests();
+    } else if (path.endsWith("wallet.html")) {
+        const addMoneyBtn = document.getElementById("add-money-btn");
+        if (addMoneyBtn) {
+            addMoneyBtn.addEventListener("click", async (event) => {
+                event.preventDefault();
+                const addAmountInput = document.getElementById("add-amount");
+                const amount = addAmountInput ? parseFloat(addAmountInput.value) : 0;
+                if (!amount || amount <= 0) {
+                    alert("Please enter a valid amount to add.");
+                    return;
+                }
+                alert("Within a minutes money will deposit in your wallet.");
+                try {
+                    const token = localStorage.getItem('cricktrades_token');
+                    if (!token) {
+                        alert("Please login to add money.");
+                        return;
+                    }
+                    const response = await fetch(`${BASE_URL}/api/request-add-money`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        },
+                        body: JSON.stringify({ amount })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        alert("Failed to request add money: " + errorData.message);
+                        return;
+                    }
+                    // Optionally clear the input
+                    if (addAmountInput) addAmountInput.value = "";
+                } catch (error) {
+                    console.error("Error requesting add money:", error);
+                    alert("Error requesting add money. Please try again.");
+                }
+            });
+        }
     }
 });
 
