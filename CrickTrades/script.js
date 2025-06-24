@@ -722,7 +722,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         "Content-Type": "application/json",
                         "Authorization": "Bearer " + token
                     },
-                    body: JSON.stringify({ userId: null, amount }) // Added userId as null, backend should handle user from token
+                    body: JSON.stringify({ amount }) // Removed userId, backend will get user from token
                 });
                     if (!response.ok) {
                         const errorData = await response.json();
