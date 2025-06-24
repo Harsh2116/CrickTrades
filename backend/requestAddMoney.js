@@ -1,0 +1,23 @@
+const express = require('express');
+const router = express.Router();
+const pool = require('./db');
+
+router.post('/request-add-money', async (req, res) => {
+    try {
+        const { userId, amount } = req.body;
+        if (!userId || !amount) {
+            return res.status(400).json({ message: 'userId and amount are required' });
+        }
+        // Insert new add money request with status 'pending'
+        await pool.query(
+            'INSERT INTO add_money_requests (user_id, amount, status, request_date) VALUES (?, ?, "pending", NOW())',
+            [userId, amount]
+        );
+        res.json({ message: 'Add money request submitted successfully' });
+    } catch (err) {
+        console.error('Error handling add money request:', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+module.exports = router;
