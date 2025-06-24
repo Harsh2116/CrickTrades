@@ -169,7 +169,7 @@ router.post('/finance/approve-add-money', authenticateAdminToken, async (req, re
         const request = requests[0];
 
         // Update user's wallet balance
-        await pool.query('UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?', [request.amount, request.user_id]);
+        await pool.query('UPDATE wallets SET main_balance = main_balance + ? WHERE user_id = ?', [request.amount, request.user_id]);
 
         // Mark request as approved
         await pool.query('UPDATE add_money_requests SET status = "approved", processed_date = NOW(), processed_by = ? WHERE id = ?', [adminId, requestId]);
