@@ -716,14 +716,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         alert("Please login to add money.");
                         return;
                     }
-                    const response = await fetch(`${BASE_URL}/api/request-add-money`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": "Bearer " + token
-                        },
-                        body: JSON.stringify({ amount })
-                    });
+                const response = await fetch(`${BASE_URL}/api/request-add-money`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify({ userId: null, amount }) // Added userId as null, backend should handle user from token
+                });
                     if (!response.ok) {
                         const errorData = await response.json();
                         alert("Failed to request add money: " + errorData.message);
