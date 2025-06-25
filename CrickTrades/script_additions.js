@@ -82,7 +82,7 @@ async function addMoney() {
         return;
     }
     try {
-        const response = await fetch(`${BASE_URL}/api/wallet/add`, {
+        const response = await fetch(`${BASE_URL}/api/request-add-money`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,15 +92,15 @@ async function addMoney() {
         });
         if (!response.ok) {
             const data = await response.json();
-            alert(data.message || "Failed to add money.");
+            alert(data.message || "Failed to request add money.");
             return;
         }
-        alert(`₹${amount.toLocaleString('en-IN')} added to your main balance.`);
+        alert("Add money request submitted successfully. Please wait for admin approval.");
         await renderWallet();
         amountInput.value = "";
     } catch (error) {
-        console.error('Error adding money:', error);
-        alert("An error occurred while adding money. Please try again.");
+        console.error('Error requesting add money:', error);
+        alert("Error requesting add money. Please try again.");
     }
 }
 
