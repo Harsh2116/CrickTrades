@@ -250,9 +250,9 @@
 
         async function fetchAddMoneyRequests() {
             try {
-                const res = await fetch(`${BASE_URL}/api/admin/finance/add-money-requests`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
+        const res = await fetch(`/api/admin/finance/add-money-requests`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
                 if (!res.ok) throw new Error('Failed to fetch add money requests');
                 const data = await res.json();
                 populateAddMoneyRequestsTable(data.addMoneyRequests);
