@@ -82,7 +82,7 @@ async function addMoney() {
         return;
     }
     try {
-        const response = await fetch(`${BASE_URL}/api/request-add-money`, {
+        const response = await fetch(`/api/request-add-money`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
